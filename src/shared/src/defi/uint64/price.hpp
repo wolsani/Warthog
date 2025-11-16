@@ -1,16 +1,16 @@
 #pragma once
 #include "prod.hpp"
+#include "wrt/optional.hpp"
 #include <bit>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
-#include "wrt/optional.hpp"
 #include <string>
 struct Price_uint64 {
 private:
     Price_uint64(uint16_t m, uint8_t e)
-        : _e(e)
-        , _m(m)
+        : _m(m)
+        , _e(e)
     {
     }
 
@@ -36,7 +36,7 @@ public:
     Price_uint64(Reader& r);
     void serialize(Serializer auto& s) const
     {
-        s << to_uint32();
+        s << _m << _e;
     }
     uint32_t to_uint32() const
     {
@@ -137,8 +137,8 @@ public:
     }
 
 private:
-    uint8_t _e; // exponent
     uint16_t _m; // mantissa
+    uint8_t _e; // exponent
 };
 
 struct PriceRelative_uint64 { // gives details relative to price grid

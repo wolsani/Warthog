@@ -24,7 +24,7 @@ TokenTransferCreate TokenTransferCreate::parse_from(const JSONConverter& c)
     return { c, c, c, c, c, c, c, c };
 }
 
-OrderCreate OrderCreate::parse_from(const JSONConverter& c)
+LimitSwapCreate LimitSwapCreate::parse_from(const JSONConverter& c)
 {
     return { c, c, c, c, c, c, c, c };
 };

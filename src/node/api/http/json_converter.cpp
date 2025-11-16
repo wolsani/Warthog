@@ -97,7 +97,7 @@ Wart JSONConverter::wart() const
 {
     try {
         wrt::optional<Wart> f;
-        auto iter = json.find("wart");
+        auto iter = json.find("wartStr");
         if (iter != json.end()) {
             f = Wart::parse(iter->get<std::string>());
             if (!f.has_value())
@@ -106,7 +106,7 @@ Wart JSONConverter::wart() const
         iter = json.find("wartE8");
         if (iter != json.end()) {
             if (f.has_value())
-                goto error; // exclusive, either "wart" or "wartE8"
+                goto error; // exclusive, either "wartStr" or "wartE8"
             f = Wart::from_value(iter->get<uint64_t>());
         }
 
@@ -119,20 +119,21 @@ error:
 }
 JSONConverter::operator WartEl() const { return wart(); }
 JSONConverter::operator NonzeroWartEl() const { return wart().nonzero_throw(); }
-Funds_uint64 JSONConverter::amount() const
+Funds_uint64 JSONConverter::amount(std::string_view key) const
 {
     try {
-        return json.at("amountUnits").get<uint64_t>();
+        return json.at(key).get<uint64_t>();
     } catch (...) {
     }
     throw Error(EBADAMOUNT);
 }
 
-JSONConverter::operator AmountEl() const { return amount(); }
+JSONConverter::operator AmountEl() const { return amount("amountU64"); }
+JSONConverter::operator SharesEl() const { return amount("amountE8"); }
 bool JSONConverter::buy() const
 {
     try {
-        return json.at("buy").get<bool>();
+        return json.at("isBuy").get<bool>();
     } catch (...) {
     }
     throw Error(EBADBUYFLAG);
@@ -142,7 +143,6 @@ Price_uint64 JSONConverter::limit() const
 {
     try {
         auto pricestr { json.at("price").get<std::string>() };
-        // return Price_uint64::from_string(json.at("price").get<std::string>());
         auto p { Price_uint64::from_string(pricestr) };
         if (p)
             return *p;
@@ -185,10 +185,10 @@ AssetName JSONConverter::asset_name() const
     throw Error(EASSETNAME);
 }
 JSONConverter::operator AssetNameEl() const { return asset_name(); }
-Funds_uint64 JSONConverter::asset_units() const
+Funds_uint64 JSONConverter::asset_supply_u64() const
 {
     try {
-        return Funds_uint64(json.at("assetUnits").get<uint64_t>());
+        return Funds_uint64(json.at("supplyU64").get<uint64_t>());
     } catch (...) {
     }
     throw Error(EBADASSETUNITS);
@@ -196,7 +196,7 @@ Funds_uint64 JSONConverter::asset_units() const
 AssetPrecision JSONConverter::asset_precision() const
 {
     try {
-        return AssetPrecision(json.at("assetPrecision").get<size_t>());
+        return AssetPrecision(json.at("precision").get<size_t>());
     } catch (...) {
     }
     throw Error(EBADASSETPRECISION);
@@ -204,7 +204,7 @@ AssetPrecision JSONConverter::asset_precision() const
 FundsDecimal JSONConverter::asset_supply() const
 {
     return FundsDecimal(
-        asset_units(),
+        asset_supply_u64(),
         asset_precision());
 }
 JSONConverter::operator AssetSupplyEl() const { return asset_supply(); }

@@ -26,8 +26,9 @@ struct JSONConverter {
     Wart wart() const;
     operator WartEl() const;
     operator NonzeroWartEl() const;
-    Funds_uint64 amount() const;
+    Funds_uint64 amount(std::string_view key) const;
     operator AmountEl() const;
+    operator SharesEl() const;
     bool buy() const;
     operator BuyEl() const;
     Price_uint64 limit() const;
@@ -38,7 +39,7 @@ struct JSONConverter {
     operator CancelHeightEl() const;
     AssetName asset_name() const;
     operator AssetNameEl() const;
-    Funds_uint64 asset_units() const;
+    Funds_uint64 asset_supply_u64() const;
     AssetPrecision asset_precision() const;
     FundsDecimal asset_supply() const;
     operator AssetSupplyEl() const;

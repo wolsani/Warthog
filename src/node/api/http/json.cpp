@@ -225,11 +225,6 @@ json to_json(const ParseAnnotations& arr)
     return j;
 }
 
-json amount_json(Funds_uint64 amt, AssetPrecision prec)
-{
-    return jsonmsg::to_json(FundsDecimal(amt, prec));
-}
-
 json limit_json(Price_uint64 limit, AssetPrecision prec)
 {
     return {
@@ -289,9 +284,10 @@ json tx_to_json(const api::block::Reward& tx)
 
 json tx_to_json(const api::block::TokenTransfer& tx)
 {
+
     json j(to_json_signed_info(tx, "fromAddress"));
     j["toAddress"] = tx.toAddress.to_string();
-    j["amount"] = to_json(tx.amount);
+    j["amount"] = to_json(tx.amount_decimal());
     j["asset"] = to_json(tx.assetInfo);
     j["isLiquidity"] = tx.isLiquidity;
     j["tokenSpec"] = api::TokenSpec(tx.assetInfo.hash, tx.isLiquidity).to_string();
@@ -307,14 +303,12 @@ json tx_to_json(const api::block::AssetCreation& tx)
     return j;
 }
 
-namespace {
-void add(json& j, const api::block::NewOrderData& tx)
+inline void add(json& j, const api::block::NewOrderData& tx)
 {
     j["baseAsset"] = jsonmsg::to_json(tx.assetInfo); // TODO: check that asset exists when NewOrder goes to mempool
-    j["amount"] = amount_json(tx.amount, tx.assetInfo.precision);
+    j["amount"] = to_json(tx.amount_decimal());
     j["limit"] = limit_json(tx.limit, tx.assetInfo.precision);
     j["buy"] = tx.buy;
-}
 }
 
 json tx_to_json(const api::block::NewOrder& tx)
@@ -534,7 +528,7 @@ json to_json(const api::MempoolEntries& entries)
                 elem["isLiquidity"] = m.is_liquidity();
                 elem["tokenSpec"] = api::TokenSpec(m.asset_hash(), m.is_liquidity()).to_string();
             },
-            [&](const OrderMessage& m) {
+            [&](const LimitSwapMessage& m) {
                 elem["type"] = api::block::NewOrderData::label;
                 elem["assetHash"] = m.asset_hash();
                 elem["buy"] = m.buy();

@@ -284,7 +284,7 @@ api::Transaction State::api_dispatch_mempool(const TxHash& txHash, TransactionMe
                     } }
             };
         },
-        [&](OrderMessage&& o) -> api::Transaction {
+        [&](LimitSwapMessage&& o) -> api::Transaction {
             auto& a { dbcache.assetsByHash.fetch(o.asset_hash()) };
             return api::NewOrderTransaction {
                 gen_temporal(),
@@ -662,7 +662,7 @@ Result<ChainMiningTask> State::mining_task(const Address& miner, bool disableTxs
                         auto& transfers = s.asset_transfers();
                         transfers.push_back({ m.from_id(), m.pin_nonce_throw(height), m.compact_fee(), addr_id(m.to_addr()), m.amount(), m.signature() });
                     },
-                    [&](OrderMessage&& m) {
+                    [&](LimitSwapMessage&& m) {
                         asset(m.asset_hash())
                             .orders()
                             .push_back({ m.from_id(), m.pin_nonce_throw(height), m.compact_fee(), m.buy(), m.amount(), m.limit(), m.signature() });
@@ -925,7 +925,7 @@ private:
                                 toMempool.push_back(TokenTransferMessage(t.txid(pinHeight), t.pin_nonce().reserved, t.compact_fee(), asset.hash, true, toAddress, t.shares(), t.signature()));
                         },
                         [&](PinHeight pinHeight, const Order& t) {
-                                toMempool.push_back(OrderMessage(t.txid(pinHeight), t.pin_nonce().reserved, t.compact_fee(), asset.hash, t.buy(), t.amount(), t.limit(), t.signature()));
+                                toMempool.push_back(LimitSwapMessage(t.txid(pinHeight), t.pin_nonce().reserved, t.compact_fee(), asset.hash, t.buy(), t.amount(), t.limit(), t.signature()));
                         },
                         [&](PinHeight pinHeight, const LiquidityDeposit& t) {
                                 toMempool.push_back(LiquidityDepositMessage(t.txid(pinHeight), t.pin_nonce().reserved, t.compact_fee(), asset.hash, t.base(), t.quote(), t.signature()));

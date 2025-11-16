@@ -285,7 +285,7 @@ TokenTransferMessage Chainstate::create_specific_tx(const TransactionId& txid, c
     return { txid, m.nonce_reserved(), m.compact_fee(), m.asset_hash(), m.is_liquidity(), m.to_addr(), m.amount(), m.signature() };
 }
 
-OrderMessage Chainstate::create_specific_tx(const TransactionId& txid, const OrderCreate& m)
+LimitSwapMessage Chainstate::create_specific_tx(const TransactionId& txid, const LimitSwapCreate& m)
 {
     return { txid, m.nonce_reserved(), m.compact_fee(), m.asset_hash(), m.buy(), m.amount(), m.limit(), m.signature() };
 }
@@ -297,7 +297,7 @@ LiquidityDepositMessage Chainstate::create_specific_tx(const TransactionId& txid
 
 LiquidityWithdrawalMessage Chainstate::create_specific_tx(const TransactionId& txid, const LiquidityWithdrawalCreate& m)
 {
-    return { txid, m.nonce_reserved(), m.compact_fee(), m.asset_hash(), m.amount(), m.signature() };
+    return { txid, m.nonce_reserved(), m.compact_fee(), m.asset_hash(), m.shares(), m.signature() };
 }
 CancelationMessage Chainstate::create_specific_tx(const TransactionId& txid, const CancelationCreate& m)
 {

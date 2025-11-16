@@ -4,7 +4,6 @@
 #include "api/types/input.hpp"
 #include "asset_lookup_trace.hpp"
 #include "block/body/primitives.hpp"
-#include "block/header/header.hpp"
 #include "block/chain/history/index.hpp"
 #include "block/chain/signed_snapshot.hpp"
 #include "block/chain/worksum.hpp"
@@ -47,7 +46,6 @@ struct HeaderInfo {
     NonzeroHeight height;
     Header header;
 };
-
 
 struct MiningState {
     ChainMiningTask miningTask;
@@ -176,7 +174,7 @@ struct TokenTransferData {
     bool isLiquidity;
     Address toAddress;
     Funds_uint64 amount;
-    FundsDecimal amount_decimal() const { return { amount, assetInfo.precision }; }
+    FundsDecimal amount_decimal() const { return { amount, isLiquidity ? AssetPrecision::digits8() : assetInfo.precision }; }
 };
 
 struct NewOrderData {

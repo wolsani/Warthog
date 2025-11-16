@@ -112,7 +112,7 @@ public:
     using ComposeTransactionMessage::ComposeTransactionMessage;
 };
 
-class OrderMessage : public ComposeTransactionMessage<4, OrderMessage, AssetHashEl, BuyEl, NonzeroAmountEl, LimitPriceEl> { // for defi we include the token hash
+class LimitSwapMessage : public ComposeTransactionMessage<4, LimitSwapMessage, AssetHashEl, BuyEl, NonzeroAmountEl, LimitPriceEl> { // for defi we include the token hash
     static_assert(has_asset_hash);
 
 public:
@@ -178,7 +178,7 @@ struct InvTxTypeExceptionGenerator {
     }
 };
 
-using TransactionVariant = wrt::indicator_variant<InvTxTypeExceptionGenerator, WartTransferMessage, TokenTransferMessage, AssetCreationMessage, OrderMessage, LiquidityDepositMessage, LiquidityWithdrawalMessage, CancelationMessage>;
+using TransactionVariant = wrt::indicator_variant<InvTxTypeExceptionGenerator, WartTransferMessage, TokenTransferMessage, AssetCreationMessage, LimitSwapMessage, LiquidityDepositMessage, LiquidityWithdrawalMessage, CancelationMessage>;
 
 struct TransactionMessage : public TransactionVariant {
 public:

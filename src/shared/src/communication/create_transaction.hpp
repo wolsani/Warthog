@@ -58,13 +58,13 @@ public:
         static name parse_from(const JSONConverter& json);         \
     };
 
-DEFINE_CREATE_MESSAGE(WartTransferCreate, "WartTransfer", ToAddrEl, NonzeroWartEl)
-DEFINE_CREATE_MESSAGE(TokenTransferCreate, "TokenTransfer", AssetHashEl, LiquidityFlagEl, ToAddrEl, AmountEl)
-DEFINE_CREATE_MESSAGE(OrderCreate, "Order", AssetHashEl, BuyEl, AmountEl, LimitPriceEl)
-DEFINE_CREATE_MESSAGE(LiquidityDepositCreate, "LiquidityDeposit", AssetHashEl, AmountEl, WartEl)
-DEFINE_CREATE_MESSAGE(LiquidityWithdrawalCreate, "LiquidityWithdrawal", AssetHashEl, AmountEl)
-DEFINE_CREATE_MESSAGE(CancelationCreate, "Cancelation", CancelHeightEl, CancelNonceEl)
-DEFINE_CREATE_MESSAGE(AssetCreationCreate, "AssetCreation", AssetSupplyEl, AssetNameEl)
+DEFINE_CREATE_MESSAGE(WartTransferCreate, "wartTransfer", ToAddrEl, NonzeroWartEl)
+DEFINE_CREATE_MESSAGE(TokenTransferCreate, "tokenTransfer", AssetHashEl, LiquidityFlagEl, ToAddrEl, AmountEl)
+DEFINE_CREATE_MESSAGE(LimitSwapCreate, "limitSwap", AssetHashEl, BuyEl, AmountEl, LimitPriceEl)
+DEFINE_CREATE_MESSAGE(LiquidityDepositCreate, "liquidityDeposit", AssetHashEl, AmountEl, WartEl)
+DEFINE_CREATE_MESSAGE(LiquidityWithdrawalCreate, "liquidityWithdrawal", AssetHashEl, SharesEl)
+DEFINE_CREATE_MESSAGE(CancelationCreate, "cancelation", CancelHeightEl, CancelNonceEl)
+DEFINE_CREATE_MESSAGE(AssetCreationCreate, "assetCreation", AssetSupplyEl, AssetNameEl)
 
 #undef DEFINE_CREATE_MESSAGE
 

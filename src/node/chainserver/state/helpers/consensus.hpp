@@ -97,7 +97,7 @@ protected:
     PinHash pin_hash(PinHeight ph) const;
     WartTransferMessage create_specific_tx(const TransactionId&, const WartTransferCreate& m);
     TokenTransferMessage create_specific_tx(const TransactionId&, const TokenTransferCreate& m);
-    OrderMessage create_specific_tx(const TransactionId&, const OrderCreate& m);
+    LimitSwapMessage create_specific_tx(const TransactionId&, const LimitSwapCreate& m);
     LiquidityDepositMessage create_specific_tx(const TransactionId&, const LiquidityDepositCreate& m);
     LiquidityWithdrawalMessage create_specific_tx(const TransactionId&, const LiquidityWithdrawalCreate& m);
     CancelationMessage create_specific_tx(const TransactionId&, const CancelationCreate& m);
