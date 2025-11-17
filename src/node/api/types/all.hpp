@@ -382,6 +382,11 @@ struct Peerinfo {
     uint32_t since;
     ThrottleState throttle;
 };
+struct ParsedPrice {
+    AssetPrecision prec;
+    Price_uint64 floor;
+    Price_uint64 ceil;
+};
 
 struct ThrottledPeer {
     Peeraddr endpoint;

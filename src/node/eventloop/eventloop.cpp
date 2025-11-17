@@ -160,7 +160,7 @@ void Eventloop::api_get_throttled(ThrottledCb&& cb)
     defer(GetThrottled { cb });
 }
 
-void Eventloop::api_disconnect_peer(uint64_t id, ResultCb&& cb)
+void Eventloop::api_disconnect_peer(uint64_t id, ErrorCb&& cb)
 {
     defer(DisconnectPeer { id, std::move(cb) });
 }
@@ -211,15 +211,15 @@ void Eventloop::api_get_hashrate_block_chart(NonzeroHeight from, NonzeroHeight t
     defer(GetHashrateBlockChart { std::move(cb), from, to, window });
 }
 
-void Eventloop::api_loadtest_block(uint64_t conId, ResultCb cb)
+void Eventloop::api_loadtest_block(uint64_t conId, ErrorCb cb)
 {
     defer(Loadtest { conId, RequestType::make<BlockRequest>(), std::move(cb) });
 }
-void Eventloop::api_loadtest_header(uint64_t conId, ResultCb cb)
+void Eventloop::api_loadtest_header(uint64_t conId, ErrorCb cb)
 {
     defer(Loadtest { conId, RequestType::make<HeaderRequest>(), std::move(cb) });
 }
-void Eventloop::api_loadtest_disable(uint64_t conId, ResultCb cb)
+void Eventloop::api_loadtest_disable(uint64_t conId, ErrorCb cb)
 {
     defer(Loadtest { conId, wrt::nullopt, std::move(cb) });
 }

@@ -51,3 +51,13 @@ private:
     uint8_t* pos;
     uint8_t* const end;
 };
+
+template <typename T>
+std::vector<uint8_t> to_bytes(T&& t)
+{
+    std::vector<uint8_t> out;
+    out.resize(count_bytes(std::forward<T>(t)));
+    Writer w(out);
+    w << t;
+    return out;
+}

@@ -148,7 +148,7 @@ Price_uint64 JSONConverter::limit() const
             return *p;
     } catch (...) {
     }
-    throw Error(EBADNONCE);
+    throw Error(EBADPRICE);
 }
 JSONConverter::operator LimitPriceEl() const
 {

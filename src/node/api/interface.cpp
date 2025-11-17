@@ -37,7 +37,7 @@ void get_banned_peers(PeerServer::banned_callback_t&& f)
 {
     global().peerServer->async_get_banned(std::move(f));
 }
-void unban_peers(ResultCb&& f)
+void unban_peers(ErrorCb&& f)
 {
     global().peerServer->async_unban(std::move(f));
 }
@@ -46,7 +46,7 @@ void get_connection_schedule(JSONCb&& cb)
 {
     global().core->api_get_connection_schedule(std::move(cb));
 }
-void get_offense_entries(ResultCb&& f)
+void get_offense_entries(ErrorCb&& f)
 {
     global().peerServer->async_unban(std::move(f));
 }
@@ -59,7 +59,7 @@ void get_connected_peers2(PeersCb&& cb)
     global().core->api_get_peers(std::move(cb));
 }
 
-void disconnect_peer(uint64_t id, ResultCb&& cb)
+void disconnect_peer(uint64_t id, ErrorCb&& cb)
 {
     global().core->api_disconnect_peer(id, std::move(cb));
 }
@@ -68,7 +68,7 @@ void get_throttled_peers(ThrottledCb&& cb)
     global().core->api_get_throttled(std::move(cb));
 }
 
-void get_connected_connection(ConnectedConnectionCB&& cb)
+void get_connected_connection(ConnectedConnectionCb&& cb)
 {
     global().core->api_get_peers([cb = std::move(cb)](const std::vector<api::Peerinfo>& pi) {
         cb({ pi });
@@ -132,6 +132,18 @@ void get_janushash_number(std::string_view sv, RawCb cb)
     };
     cb({ double_to_string(h.janus_number()) });
 }
+
+void parse_price(std::string_view priceStr, AssetPrecision p, ResultCb<api::ParsedPrice> cb)
+{
+    if (auto d { try_parse<double>(priceStr) }) {
+        auto floor { Price_uint64::from_double_adjusted(*d, p, false) };
+        auto ceil { Price_uint64::from_double_adjusted(*d, p, true) };
+        if (floor && ceil)
+            cb(api::ParsedPrice {p, *floor, *ceil });
+    }
+    cb(Error(EBADPRICE));
+}
+
 void sample_verified_peers(size_t n, SampledPeersCb cb)
 {
     global().core->api_sample_verified_peers(n, std::move(cb));
@@ -289,7 +301,7 @@ void get_hashrate_time_chart(uint32_t from, uint32_t to, size_t window, Hashrate
     global().core->api_get_hashrate_time_chart(from, to, window, std::move(cb));
 }
 
-void put_chain_append(BlockWorker&& bw, ResultCb f)
+void put_chain_append(BlockWorker&& bw, ErrorCb f)
 {
     global().chainServer->api_call(chainserver::MiningAppend(bw.block, bw.worker), f);
 }
@@ -354,15 +366,15 @@ void destroy_all_subscriptions(subscription_data_ptr p)
     global().chainServer->destroy_subscriptions(p);
     global().core->destroy_subscriptions(p);
 }
-void loadtest_block(uint64_t conId, ResultCb cb)
+void loadtest_block(uint64_t conId, ErrorCb cb)
 {
     global().core->api_loadtest_block(conId, std::move(cb));
 }
-void loadtest_header(uint64_t conId, ResultCb cb)
+void loadtest_header(uint64_t conId, ErrorCb cb)
 {
     global().core->api_loadtest_header(conId, std::move(cb));
 }
-void loadtest_disable(uint64_t conId, ResultCb cb)
+void loadtest_disable(uint64_t conId, ErrorCb cb)
 {
     global().core->api_loadtest_disable(conId, std::move(cb));
 }

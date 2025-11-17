@@ -22,6 +22,7 @@ struct MempoolEntries;
 struct MempoolUpdate;
 struct MiningState;
 struct Peerinfo;
+struct ParsedPrice;
 struct PeerinfoConnections;
 struct Raw;
 struct TokenBalance;

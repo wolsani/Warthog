@@ -27,6 +27,7 @@ std::string serialize_hex(View<N> v)
 {
     return serialize_hex(vec.data(), vec.size());
 }
+
 inline std::string serialize_hex(uint32_t v)
 {
     uint32_t network = hton32(v);
@@ -36,7 +37,7 @@ inline std::string serialize_hex(uint32_t v)
 bool parse_hex(std::string_view in, uint8_t* out, size_t out_size);
 inline void parse_hex_throw(std::string_view in, uint8_t* out, size_t out_size)
 {
-    if(!parse_hex(in, out, out_size))
+    if (!parse_hex(in, out, out_size))
         throw Error(EINV_HEX);
 }
 
@@ -45,7 +46,6 @@ bool parse_hex(std::string_view in, std::array<uint8_t, N>& out)
 {
     return parse_hex(in, out.data(), out.size());
 }
-
 
 template <size_t N>
 std::array<uint8_t, N> hex_to_arr(std::string_view in)

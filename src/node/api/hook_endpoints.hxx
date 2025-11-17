@@ -1,5 +1,6 @@
 #pragma once
 #include "api/http/json.hpp"
+#include "tools/try_parse.hpp"
 // #include "general/funds.hpp"
 #include "api/http/parse.hpp"
 #include "api/types/accountid_or_address.hpp"
@@ -11,7 +12,6 @@
 #include "general/hex.hpp"
 #include "http/json.hpp"
 #include "spdlog/spdlog.h"
-#include <charconv>
 #include <string>
 
 namespace {
@@ -21,13 +21,9 @@ struct ParameterParser {
     requires std::is_integral_v<T>
     operator T()
     {
-        T res {};
-        auto end { sv.data() + sv.size() };
-        auto result = std::from_chars(sv.data(), end, res);
-        if (result.ec != std::errc {} || result.ptr != end) {
-            throw Error(EINV_ARGS);
-        }
-        return res;
+        if (auto p { try_parse<T>(sv) })
+            return *p;
+        throw Error(EINV_ARGS);
     }
     operator api::HeightOrHash()
     {
@@ -40,6 +36,10 @@ struct ParameterParser {
         if (sv.length() == 48)
             return { Address { *this } };
         return { AccountId { static_cast<uint64_t>(*this) } };
+    }
+    operator AssetPrecision()
+    {
+        return static_cast<uint64_t>(*this);
     }
     operator PrivKey()
     {
@@ -273,6 +273,7 @@ public:
         hook_get_1(t, "/tools/encode16bit/from_e8/:feeE8", get_round16bit_e8);
         hook_get_1(t, "/tools/encode16bit/from_string/:string", get_round16bit_funds);
         hook_get(t, "/tools/version", get_version);
+        hook_get_2(t, "/tools/parse_price/:price/:precision", parse_price);
         hook_get(t, "/tools/info", get_info);
         hook_get(t, "/tools/wallet/new", get_wallet_new);
         hook_get_1(t, "/tools/wallet/from_privkey/:privkey", get_wallet_from_privkey);

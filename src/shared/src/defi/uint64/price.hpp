@@ -1,5 +1,6 @@
 #pragma once
 #include "prod.hpp"
+#include "tools/try_parse.hpp"
 #include "wrt/optional.hpp"
 #include <bit>
 #include <cassert>
@@ -55,11 +56,11 @@ public:
 
 private:
     // base 2 exponent if mantissa would denote a number between 0 and 1
-    auto exponent_base2() const { return _e - 63; }
+    int exponent_base2() const { return _e - 63; }
 
 public:
     // real exponent for mantissa as integer
-    auto mantissa_exponent2() const { return exponent_base2() - 16; }
+    int mantissa_exponent2() const { return exponent_base2() - 16; }
 
     // compute double price based on uint64 quotient
     double to_double_raw() const
@@ -69,7 +70,7 @@ public:
         return std::ldexp(m, e2);
     }
 
-    int base10_exponent(AssetPrecision prec) const
+    int base10_precision_exponent(AssetPrecision prec) const
     {
         // - real limit price is quote/base
         // - limit price variable is quoteU64/baseU64
@@ -81,8 +82,8 @@ public:
     // compute double price respecting the asset precision
     double to_double_adjusted(AssetPrecision prec) const
     {
-        auto b10e { base10_exponent(prec) };
-        return to_double_raw() * std::pow(10.0, b10e);
+        auto b10e { base10_precision_exponent(prec) };
+        return to_double_raw() * std::pow(10.0, -b10e);
     }
     [[nodiscard]] static wrt::optional<Price_uint64>
     from_mantissa_exponent(uint32_t mantissa, int exponent)
@@ -117,23 +118,33 @@ public:
 
     auto operator<=>(const Price_uint64&) const = default;
 
-    static wrt::optional<Price_uint64> from_double(double d)
+    static wrt::optional<Price_uint64> from_double_adjusted(double d, AssetPrecision prec, bool ceil = false)
     {
-        if (d <= 0.0)
+        return from_double(d * std::pow(10.0, 8 - int(prec.value())), ceil);
+    }
+
+    static wrt::optional<Price_uint64> from_double(double d, bool ceil = false)
+    {
+        if (d <= 0.0 || !std::isnormal(d))
             return {};
         int exp;
         double mantissa { std::frexp(d, &exp) };
         uint32_t mantissa32(mantissa * (1 << 16));
+        bool exact { (mantissa * (1 << 16)) == double(mantissa32) };
+        if (ceil && !exact) {
+            mantissa32 += 1;
+            if (mantissa32 >= 1 << 16) { // carry
+                mantissa32 >>= 1;
+                exp += 1;
+            }
+        }
         return from_mantissa_exponent(mantissa32, exp);
     }
 
-    static wrt::optional<Price_uint64> from_string(std::string s)
+    static wrt::optional<Price_uint64> from_string(std::string_view s, bool ceil = false)
     {
-        try {
-            return from_double(std::stod(s));
-        } catch (...) {
-            return {};
-        }
+        return try_parse<double>(s)
+            .and_then([&](double d) { return from_double(d, ceil); });
     }
 
 private:

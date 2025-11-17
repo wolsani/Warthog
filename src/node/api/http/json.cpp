@@ -228,9 +228,10 @@ json to_json(const ParseAnnotations& arr)
 json limit_json(Price_uint64 limit, AssetPrecision prec)
 {
     return {
-        { "exponent10", limit.base10_exponent(prec) },
+        { "precExponent10", limit.base10_precision_exponent(prec) },
         { "exponent2", limit.mantissa_exponent2() },
         { "mantissa", limit.mantissa_16bit() },
+        { "hex", serialize_hex(to_bytes(limit)) },
         { "double", limit.to_double_adjusted(prec) },
     };
 }
@@ -804,6 +805,16 @@ json to_json(const api::Peerinfo& pi)
         { "grid", grid_json(pi.chainstate.descripted()->grid()) }
     };
     return elem;
+}
+
+json to_json(const api::ParsedPrice& p)
+{
+
+    return {
+        { "assetPrecision", p.prec.value() },
+        { "floor", limit_json(p.floor, p.prec) },
+        { "ceil", limit_json(p.ceil, p.prec) },
+    };
 }
 
 json to_json(const TCPPeeraddr& a)

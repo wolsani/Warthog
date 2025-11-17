@@ -166,7 +166,6 @@ public:
     void async_put_mempool(std::vector<TransactionMessage> txs);
 
     // API methods
-    // void api_put_mempool(PaymentCreateMessage, ResultCb cb);
     [[nodiscard]] mining_subscription::MiningSubscription api_subscribe_mining(Address address, mining_subscription::callback_t callback);
     void api_unsubscribe_mining(mining_subscription::SubscriptionId);
 

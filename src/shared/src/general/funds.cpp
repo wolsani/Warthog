@@ -3,6 +3,7 @@
 #include "general/params.hpp"
 #include "general/reader.hpp"
 #include "nlohmann/json.hpp"
+#include "tools/try_parse.hpp"
 #include <cassert>
 #include <charconv>
 #include <cstring>
@@ -35,11 +36,10 @@ wrt::optional<ParsedFunds> ParsedFunds::parse(std::string_view s)
             return {}; // neither dot nor digit
         }
     }
-    uint64_t v;
-    auto [ptr, ec] { std::from_chars(buf, buf + i, v) };
-    if (ec != std::errc() || ptr != buf + i)
-        return {}; // unparsable number
-    return ParsedFunds { v, digits };
+    return try_parse<uint64_t>({ buf, buf + i })
+        .transform([&](uint64_t v) {
+            return ParsedFunds { v, digits };
+        });
 }
 ParsedFunds::ParsedFunds(std::string_view s)
     : ParsedFunds([&s]() {
@@ -114,10 +114,11 @@ wrt::optional<Funds_uint64> Funds_uint64::parse(ParsedFunds fd, AssetPrecision d
     return Funds_uint64::from_value(v);
 }
 
-nlohmann::json Supply::to_json() const{
+nlohmann::json Supply::to_json() const
+{
     return {
-        {"str", to_string()},
-        {"u64", this->funds.value()}
+        { "str", to_string() },
+        { "u64", this->funds.value() }
     };
 }
 

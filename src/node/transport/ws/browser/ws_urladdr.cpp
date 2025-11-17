@@ -1,6 +1,6 @@
 #include "ws_urladdr.hpp"
 #include "spdlog/spdlog.h"
-#include <charconv>
+#include "tools/try_parse.hpp"
 #include <regex>
 
 const wrt::optional<IP> WSUrladdr::ip = {};
@@ -12,12 +12,7 @@ wrt::optional<uint16_t> parse_port(std::string_view scheme, std::string_view por
             return 433;
         return 80;
     }
-    uint16_t res;
-    auto end { portStr.data() + portStr.size() };
-    auto result = std::from_chars(portStr.data(), end, res);
-    if (result.ec != std::errc {} || result.ptr != end)
-        return {};
-    return res;
+    return try_parse<uint16_t>(portStr);
 }
 }
 

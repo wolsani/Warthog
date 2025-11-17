@@ -126,10 +126,10 @@ public:
     void async_push_rogue(const RogueHeaderData&);
     void api_get_peers(PeersCb&& cb);
     void api_get_throttled(ThrottledCb&& cb);
-    void api_loadtest_block(uint64_t conId, ResultCb);
-    void api_loadtest_header(uint64_t conId, ResultCb);
-    void api_loadtest_disable(uint64_t conId, ResultCb);
-    void api_disconnect_peer(uint64_t id, ResultCb&& cb);
+    void api_loadtest_block(uint64_t conId, ErrorCb);
+    void api_loadtest_header(uint64_t conId, ErrorCb);
+    void api_loadtest_disable(uint64_t conId, ErrorCb);
+    void api_disconnect_peer(uint64_t id, ErrorCb&& cb);
     void api_get_synced(SyncedCb&& cb);
     void api_inspect(InspectorCb&&);
     void api_count_ips(IpCounterCb&&);
@@ -326,7 +326,7 @@ private:
 
     struct DisconnectPeer {
         uint64_t id;
-        ResultCb cb;
+        ErrorCb cb;
     };
     struct SampleVerifiedPeers {
         size_t n;
@@ -342,7 +342,7 @@ private:
     struct Loadtest {
         uint64_t connId;
         wrt::optional<RequestType> requestType;
-        ResultCb callback;
+        ErrorCb callback;
     };
     struct PushRogue {
         RogueHeaderData rogueHeaderData;

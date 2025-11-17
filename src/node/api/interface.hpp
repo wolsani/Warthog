@@ -35,7 +35,7 @@ void get_transaction_minfee(TransactionMinfeeCb f);
 // peer functions
 void get_ip_count(IpCounterCb&& cb);
 void get_banned_peers(PeerServer::banned_callback_t&& cb);
-void unban_peers(ResultCb&& cb);
+void unban_peers(ErrorCb&& cb);
 void get_connection_schedule(JSONCb&& cb);
 
 inline void get_offenses(Page page, PeerServer::offenses_callback_t&& cb)
@@ -49,9 +49,9 @@ void get_failed_addresses(PeerServer::banned_callback_t cb);
 void get_verified_addresses(PeerServer::banned_callback_t cb);
 
 void get_connected_peers2(PeersCb&& cb);
-void disconnect_peer(uint64_t, ResultCb&& cb);
+void disconnect_peer(uint64_t, ErrorCb&& cb);
 void get_throttled_peers(ThrottledCb&& cb);
-void get_connected_connection(ConnectedConnectionCB&& cb);
+void get_connected_connection(ConnectedConnectionCb&& cb);
 
 void set_minfee(uint64_t fee, MempoolConstraintCb cb);
 
@@ -63,6 +63,7 @@ void get_info(InfoCb cb);
 void get_wallet_new(WalletCb cb);
 void get_wallet_from_privkey(const PrivKey& pk, WalletCb cb);
 void get_janushash_number(std::string_view, RawCb cb);
+void parse_price(std::string_view, AssetPrecision precision, ResultCb<api::ParsedPrice> cb);
 void sample_verified_peers(size_t n, SampledPeersCb cb);
 
 // chain functions
@@ -73,7 +74,7 @@ void get_hashrate_n(size_t n, HashrateCb&& cb);
 void get_hashrate(HashrateCb&& cb);
 void get_hashrate_block_chart(NonzeroHeight from, NonzeroHeight to, size_t window, HashrateBlockChartCb&& cb);
 void get_hashrate_time_chart(uint32_t from, uint32_t to, size_t window, HashrateTimeChartCb&& cb);
-void put_chain_append(BlockWorker&& mt, ResultCb cb);
+void put_chain_append(BlockWorker&& mt, ErrorCb cb);
 void get_signed_snapshot(Eventloop::SignedSnapshotCb&& cb);
 
 // sync functions
@@ -95,6 +96,6 @@ void subscribe_account_event(SubscriptionRequest, Address);
 void subscribe_minerdist_event(SubscriptionRequest);
 void subscribe_log_event(SubscriptionRequest);
 void destroy_all_subscriptions(subscription_data_ptr);
-void loadtest_block(uint64_t conId, ResultCb);
-void loadtest_header(uint64_t conId, ResultCb);
-void loadtest_disable(uint64_t conId, ResultCb);
+void loadtest_block(uint64_t conId, ErrorCb);
+void loadtest_header(uint64_t conId, ErrorCb);
+void loadtest_disable(uint64_t conId, ErrorCb);
