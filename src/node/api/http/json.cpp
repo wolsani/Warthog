@@ -232,7 +232,8 @@ json limit_json(Price_uint64 limit, AssetPrecision prec)
         { "exponent2", limit.mantissa_exponent2() },
         { "mantissa", limit.mantissa_16bit() },
         { "hex", serialize_hex(to_bytes(limit)) },
-        { "double", limit.to_double_adjusted(prec) },
+        { "doubleAdjusted", limit.to_double_adjusted(prec) },
+        { "doubleRaw", limit.to_double_raw() },
     };
 }
 } // namespace
