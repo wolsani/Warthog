@@ -91,10 +91,6 @@ void get_round16bit_funds(Wart f, RoundCb cb)
     cb(api::Round16Bit { f });
 }
 
-void get_version(VersionCb cb)
-{
-    cb(PrintNodeVersion {});
-}
 void get_info(InfoCb cb)
 {
     api_call<chainserver::GetDBSize>(

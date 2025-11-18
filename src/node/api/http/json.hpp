@@ -20,7 +20,6 @@ json to_json(const api::ParsedPrice&);
 json to_json(const TCPPeeraddr&);
 json to_json(const api::WartBalance&);
 json to_json(const Grid&);
-json to_json(const PrintNodeVersion&);
 json to_json(const Hash&);
 json to_json(const TxHash&);
 json to_json(const api::Head&);

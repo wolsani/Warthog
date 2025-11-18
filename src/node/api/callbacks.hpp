@@ -25,8 +25,6 @@ class Downloader;
 namespace chainserver {
 struct TransactionIds;
 }
-struct PrintNodeVersion {
-};
 
 class Header;
 struct TCPPeeraddr;
@@ -71,7 +69,6 @@ using TransactionMinfeeCb = ResultCb<api::TransactionMinfee>;
 using BlockCb = ResultCb<api::Block>;
 using HistoryCb = ResultCb<api::AccountHistory>;
 using RichlistCb = ResultCb<api::Richlist>;
-using VersionCb = ResultCb<PrintNodeVersion>;
 using WalletCb = ResultCb<api::Wallet>;
 using DBSizeCb = ResultCb<api::DBSize>;
 using InfoCb = ResultCb<api::NodeInfo>;

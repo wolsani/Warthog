@@ -901,17 +901,6 @@ nlohmann::json to_json(const api::Round16Bit& e)
     };
 }
 
-nlohmann::json to_json(const PrintNodeVersion&)
-{
-    return json {
-        { "name", CMDLINE_PARSER_VERSION },
-        { "major", VERSION_MAJOR },
-        { "minor", VERSION_MINOR },
-        { "patch", VERSION_PATCH },
-        { "commit", GIT_COMMIT_INFO }
-    };
-}
-
 nlohmann::json to_json(const api::Rollback& rb)
 {
     return json {

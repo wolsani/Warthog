@@ -272,7 +272,6 @@ public:
         t.indexGenerator.section("Tools Endpoints");
         hook_get_1(t, "/tools/encode16bit/from_e8/:feeE8", get_round16bit_e8);
         hook_get_1(t, "/tools/encode16bit/from_string/:string", get_round16bit_funds);
-        hook_get(t, "/tools/version", get_version);
         hook_get_2(t, "/tools/parse_price/:price/:precision", parse_price);
         hook_get(t, "/tools/info", get_info);
         hook_get(t, "/tools/wallet/new", get_wallet_new);
