@@ -434,7 +434,7 @@ private: // private data
     ChainServer& stateServer;
     // Conndatamap connections;
     StageAndConsensus chains;
-    mempool::Mempool mempool; // copy of chainserver mempool
+    mempool::MempoolTransactions mempool; // copy of chainserver mempool
     wrt::optional<SyncTiming> syncTiming;
 
     AddressManager connections;

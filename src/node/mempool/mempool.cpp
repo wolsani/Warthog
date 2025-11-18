@@ -23,7 +23,7 @@ void LockedBalance::unlock(Funds_uint64 amount)
     used.subtract_assert(amount);
 }
 
-std::vector<TransactionMessage> Mempool::get_transactions(size_t n, NonzeroHeight height, std::vector<TxHash>* hashes) const
+std::vector<TransactionMessage> MempoolTransactions::get_transactions(size_t n, NonzeroHeight height, std::vector<TxHash>* hashes) const
 {
     std::vector<TransactionMessage> res;
     res.reserve(n);
@@ -57,7 +57,17 @@ std::vector<TransactionMessage> Mempool::get_transactions(size_t n, NonzeroHeigh
     return res;
 }
 
-void Mempool::apply_log(const Updates& log)
+auto MempoolTransactions::insert(Entry e) -> std::pair<iter_t, bool>
+{
+    auto p = txs().insert(std::move(e));
+    assert(p.second);
+    assert(_index.insert(p.first));
+    assert(byFee.insert(p.first));
+    assert(byToken.insert(p.first));
+    return p;
+}
+
+void MempoolTransactions::apply_log(const Updates& log)
 {
     for (auto& l : log) {
         std::visit([&](auto& entry) {
@@ -67,24 +77,40 @@ void Mempool::apply_log(const Updates& log)
     }
 }
 
-void Mempool::apply_logevent(const Put& a)
+void MempoolTransactions::apply_logevent(const Put& a)
 {
     erase(a.entry.txid());
-    auto p = txs().insert(std::move(a.entry));
     api::event::emit_mempool_add(a, txs.size());
-    assert(p.second);
-    assert(index.insert(p.first));
-    assert(byFee.insert(p.first));
-    assert(byToken.insert(p.first));
+    insert(std::move(a.entry));
 }
 
-void Mempool::apply_logevent(const Erase& e)
+void MempoolTransactions::apply_logevent(const Erase& e)
 {
     erase(e.id);
     api::event::emit_mempool_erase(e, size());
 }
+bool MempoolTransactions::erase(TransactionId txid)
+{
+    if (auto iter { txs().find(txid) }; iter != txs().end()) {
+        erase(iter);
+        return true;
+    }
+    return false;
+}
 
-wrt::optional<TransactionMessage> Mempool::operator[](const TransactionId& id) const
+void MempoolTransactions::erase(iter_t iter)
+{
+    assert(size() == _index.size());
+    assert(size() == byFee.size());
+    assert(size() == byToken.size());
+    // erase iter and its references
+    assert(_index.erase(iter) == 1);
+    assert(byFee.erase(iter) == 1);
+    assert(byToken.erase(iter) == 1);
+    txs().erase(iter);
+}
+
+wrt::optional<TransactionMessage> MempoolTransactions::operator[](const TransactionId& id) const
 {
     auto iter = txs().find(id);
     if (iter == txs().end())
@@ -92,86 +118,25 @@ wrt::optional<TransactionMessage> Mempool::operator[](const TransactionId& id) c
     return *static_cast<const TransactionMessage*>(&*iter);
 }
 
-wrt::optional<TransactionMessage> Mempool::operator[](const HashView txHash) const
+wrt::optional<TransactionMessage> MempoolTransactions::operator[](const HashView txHash) const
 {
-    auto iter = index.hash().find(txHash);
-    if (iter == index.hash().end())
+    auto iter = _index.hash().find(txHash);
+    if (iter == _index.hash().end())
         return {};
     assert((*iter)->txhash == txHash);
     return *static_cast<const TransactionMessage*>(&**iter);
 }
-
-auto Mempool::erase_internal_wartiter(Txset::const_iter_t iter, balance_iterator wartIter, wrt::optional<balance_iterator> tokenIter) -> EraseResult
+CompactUInt MempoolTransactions::min_fee() const
 {
-
-    EraseResult er { false, false };
-
-    // now unlock balances that were occupied by erased mempool entry
-    if (master) { // only master keeps track of locked balances
-        updates.push_back(Erase { iter->txid() });
-        auto unlock { [&](BalanceEntries::iterator& iter, Funds_uint64 amount) {
-            assert(iter != lockedBalances.end()); // because there is nonzero locked balance (t->amount != 0)
-            auto& balanceEntry { iter->second };
-            balanceEntry.unlock(amount);
-            if (balanceEntry.is_clean()) {
-                lockedBalances.erase(iter);
-                iter = lockedBalances.end();
-                return true;
-            }
-            return false;
-        } };
-        // update locked token balance
-        if (auto tokenSpend { iter->spend_token_assert() }) {
-            if (!tokenIter)
-                tokenIter = lockedBalances.find({ iter->from_id(), iter->altTokenId });
-            er.erasedToken = unlock(*tokenIter, tokenSpend->amount);
-        }
-
-        // update locked wart balance
-        Wart wartSpend { iter->spend_wart_assert() };
-        er.erasedWart = unlock(wartIter, wartSpend);
-    }
-
-    assert(size() == index.size());
-    assert(size() == byFee.size());
-    assert(size() == byToken.size());
-    // erase iter and its references
-    assert(index.erase(iter) == 1);
-    assert(byFee.erase(iter) == 1);
-    assert(byToken.erase(iter) == 1);
-    txs().erase(iter);
-    return er;
+    auto minFromMempool { [&]() {
+        if (size() < maxSize)
+            return CompactUInt::smallest();
+        return byFee.smallest()->compact_fee().next();
+    }() };
+    return std::max(config().minMempoolFee.load(), minFromMempool);
 }
 
-void Mempool::erase_internal(Txset::const_iter_t iter)
-{
-    auto wartIter = lockedBalances.find({ iter->from_id(), TokenId::WART });
-    assert(wartIter != lockedBalances.end());
-    erase_internal_wartiter(iter, wartIter);
-}
-
-void Mempool::erase_from_height(NonzeroHeight h)
-{
-    auto iter { index.txheight().lower_bound(h) };
-    while (iter != index.txheight().end())
-        erase_internal(*(iter++));
-}
-
-void Mempool::erase_pinned_before_height(Height h)
-{
-    auto end = index.pin().lower_bound(h);
-    for (auto iter = index.pin().begin(); iter != end;)
-        erase_internal(*(iter++));
-}
-
-void Mempool::erase(TransactionId id)
-{
-    auto& t { txs() };
-    if (auto iter = t.find(id); iter != t.end())
-        erase_internal(iter);
-}
-
-std::vector<TxidWithFee> Mempool::sample(size_t N, bool onlyWartTransfer) const
+std::vector<TxidWithFee> MempoolTransactions::sample(size_t N, bool onlyWartTransfer) const
 {
     auto sampled { byFee.sample(800, N) };
     std::vector<TxidWithFee> out;
@@ -182,8 +147,7 @@ std::vector<TxidWithFee> Mempool::sample(size_t N, bool onlyWartTransfer) const
     }
     return out;
 }
-
-std::vector<TransactionId> Mempool::filter_new(const std::vector<TxidWithFee>& v) const
+std::vector<TransactionId> MempoolTransactions::filter_new(const std::vector<TxidWithFee>& v) const
 {
     std::vector<TransactionId> out;
     for (auto& t : v) {
@@ -197,6 +161,67 @@ std::vector<TransactionId> Mempool::filter_new(const std::vector<TxidWithFee>& v
     return out;
 }
 
+auto Mempool::erase_internal_wartiter(Txset::const_iter_t iter, balance_iterator wartIter, wrt::optional<balance_iterator> tokenIter) -> EraseResult
+{
+
+    EraseResult er { false, false };
+
+    // now unlock balances that were occupied by erased mempool entry
+    updates.push_back(Erase { iter->txid() });
+    auto unlock { [&](BalanceEntries::iterator& iter, Funds_uint64 amount) {
+        assert(iter != lockedBalances.end()); // because there is nonzero locked balance (t->amount != 0)
+        auto& balanceEntry { iter->second };
+        balanceEntry.unlock(amount);
+        if (balanceEntry.is_clean()) {
+            lockedBalances.erase(iter);
+            iter = lockedBalances.end();
+            return true;
+        }
+        return false;
+    } };
+    // update locked token balance
+    if (auto tokenSpend { iter->spend_token_assert() }) {
+        if (!tokenIter)
+            tokenIter = lockedBalances.find({ iter->from_id(), iter->altTokenId });
+        er.erasedToken = unlock(*tokenIter, tokenSpend->amount);
+    }
+
+    // update locked wart balance
+    Wart wartSpend { iter->spend_wart_assert() };
+    er.erasedWart = unlock(wartIter, wartSpend);
+
+    transactions.erase(iter);
+    return er;
+}
+
+void Mempool::erase_internal(Txset::const_iter_t iter)
+{
+    auto wartIter = lockedBalances.find({ iter->from_id(), TokenId::WART });
+    assert(wartIter != lockedBalances.end());
+    erase_internal_wartiter(iter, wartIter);
+}
+
+void Mempool::erase_from_height(NonzeroHeight h)
+{
+    auto iter { transactions.index().txheight().lower_bound(h) };
+    while (iter != transactions.index().txheight().end())
+        erase_internal(*(iter++));
+}
+
+void Mempool::erase_pinned_before_height(Height h)
+{
+    auto end = transactions.index().pin().lower_bound(h);
+    for (auto iter = transactions.index().pin().begin(); iter != end;)
+        erase_internal(*(iter++));
+}
+
+void Mempool::erase(TransactionId id)
+{
+    auto& t { transactions };
+    if (auto iter = t.find(id); iter != t.end())
+        erase_internal(iter);
+}
+
 void Mempool::set_free_balance(AccountToken at, Funds_uint64 newBalance)
 {
     auto tokenIter { lockedBalances.find(at) };
@@ -207,7 +232,7 @@ void Mempool::set_free_balance(AccountToken at, Funds_uint64 newBalance)
         return;
     if (at.token_id() == TokenId::WART) {
 
-        auto iterators { txs.by_fee_inc_le(at.account_id()) };
+        auto iterators { transactions.by_fee_inc_le(at.account_id()) };
         for (size_t i = 0; i < iterators.size(); ++i) {
             bool allErased = erase_internal_wartiter(iterators[i], tokenIter).erasedWart;
             bool lastIteration = (i == iterators.size() - 1);
@@ -225,7 +250,7 @@ void Mempool::set_free_balance(AccountToken at, Funds_uint64 newBalance)
         // associated with this account and so there must be some WART locked.
         assert(wart_iter != lockedBalances.end()); // since some WART must be locked
 
-        auto& sorted { index.account_token_fee() };
+        auto& sorted { transactions.index().account_token_fee() };
         auto iter = sorted.lower_bound(at);
         auto iteration_done { [&]() { return iter == sorted.end() || (*iter)->account_token() != at; } };
         bool done { iteration_done() };
@@ -291,8 +316,8 @@ void Mempool::insert_tx_throw(const TransactionMessage& pm,
 
     wrt::optional<Txset::const_iter_t> match;
     std::vector<Txset::const_iter_t> clear;
-    const auto& t { txs };
-    if (auto iter = t().find(pm.txid()); iter != t().end()) {
+    const auto& t { transactions };
+    if (auto iter = t.find(pm.txid()); iter != t.end()) {
         if (iter->compact_fee() >= pm.compact_fee()) {
             throw Error(ENONCE);
         }
@@ -321,7 +346,7 @@ void Mempool::insert_tx_throw(const TransactionMessage& pm,
             assert(wartIter || !bal_iter); // if no wart iterator then there is no entry in lockedBalances for any token with this account because every transaction locks some WART.
             if (tokenBal.total() < tokenSpend)
                 throw Error(ETOKBALANCE);
-            auto& set { index.account_token_fee() };
+            auto& set { transactions.index().account_token_fee() };
             // loop through the range where the AccountToken is equal
             for (auto it { set.lower_bound(at) };
                 it != set.end() && (*it)->altTokenId == at.token_id() && (*it)->from_id() == fromId; ++it) {
@@ -345,7 +370,7 @@ void Mempool::insert_tx_throw(const TransactionMessage& pm,
 
     { // check if we can delete enough old entries to insert new entry
         if (wartBal.free() < wartSpend) {
-            auto iterators { txs.by_fee_inc_le(pm.txid().accountId, pm.compact_fee()) };
+            auto iterators { transactions.by_fee_inc_le(pm.txid().accountId, pm.compact_fee()) };
             for (auto iter : iterators) {
                 if (iter == match)
                     continue;
@@ -375,13 +400,9 @@ void Mempool::insert_tx_throw(const TransactionMessage& pm,
     if (altId != TokenId::WART)
         create_or_get_balance_iter({ fromId, altId }, cache)->second.lock(tokenSpend);
 
-    auto [iter, inserted] = txs().insert(Entry { pm, txhash, txh, altId });
+    auto [iter, inserted] = transactions.insert(Entry { pm, txhash, txh, altId });
     assert(inserted);
-    if (master)
-        updates.push_back(Put { *iter });
-    assert(index.insert(iter));
-    assert(byFee.insert(iter));
-    assert(byToken.insert(iter));
+    updates.push_back(Put { *iter });
     prune();
 }
 
@@ -389,10 +410,10 @@ size_t Mempool::on_constraint_update()
 {
     size_t deleted { 0 };
     auto minFee { config().minMempoolFee.load() };
-    while (byFee.size() != 0) {
-        if (byFee.smallest()->compact_fee() >= minFee)
+    while (size() != 0) {
+        if (transactions.by_fee().smallest()->compact_fee() >= minFee)
             break;
-        erase_internal(byFee.smallest());
+        erase_internal(transactions.by_fee().smallest());
         deleted += 1;
     }
     return deleted;
@@ -400,18 +421,8 @@ size_t Mempool::on_constraint_update()
 
 void Mempool::prune()
 {
-    while (size() > maxSize)
-        erase_internal(byFee.smallest()); // delete smallest element
-}
-
-CompactUInt Mempool::min_fee() const
-{
-    auto minFromMempool { [&]() {
-        if (size() < maxSize)
-            return CompactUInt::smallest();
-        return byFee.smallest()->compact_fee().next();
-    }() };
-    return std::max(config().minMempoolFee.load(), minFromMempool);
+    while (size() > transactions.max_size())
+        erase_internal(transactions.by_fee().smallest()); // delete smallest element
 }
 
 }

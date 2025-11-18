@@ -47,7 +47,7 @@ Eventloop::Eventloop(Token, PeerServer& ps, ChainServer& cs, const ConfigParams&
     : startedAt(std::chrono::steady_clock::now())
     , stateServer(cs)
     , chains(cs.get_chainstate())
-    , mempool(false)
+    , mempool()
 #ifndef DISABLE_LIBUV
     , connections({ ps, cfg.peers.connect })
 #else
