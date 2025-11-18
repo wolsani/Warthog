@@ -23,7 +23,7 @@ namespace messages {
 struct SpendToken {
     AssetHash hash;
     bool isLiquidity;
-    Funds_uint64 amount;
+    NonzeroFunds_uint64 amount;
 };
 }
 
@@ -104,7 +104,7 @@ public:
     {
         // nothing to check since the amount() is already zero by type restriction
     }
-    [[nodiscard]] wrt::optional<messages::SpendToken> spend_token_throw() const { return messages::SpendToken { asset_hash(), is_liquidity(), amount() }; }
+    [[nodiscard]] messages::SpendToken spend_token_throw() const { return messages::SpendToken { asset_hash(), is_liquidity(), amount() }; }
 };
 
 class AssetCreationMessage : public ComposeTransactionMessage<3, AssetCreationMessage, AssetSupplyEl, AssetNameEl> {
@@ -131,9 +131,11 @@ class LiquidityDepositMessage : public ComposeTransactionMessage<5, LiquidityDep
 
 public:
     [[nodiscard]] Wart spend_wart_throw() const { return sum_throw(fee(), quote()); }
-    [[nodiscard]] messages::SpendToken spend_token_throw() const
+    [[nodiscard]] std::optional<messages::SpendToken> spend_token_throw() const
     {
-        return { asset_hash(), false, base() };
+        if (base().is_zero())
+            return {};
+        return messages::SpendToken { asset_hash(), false, base() };
     }
     using parent_t::parent_t;
 };

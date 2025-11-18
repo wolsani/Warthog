@@ -60,31 +60,23 @@ class TokenData {
 public:
     bool insert(const_iterator_t iter)
     {
-        _size += 1;
-        // auto tokenId { iter->altToken };
-        // if (tokenId == TokenId::WART)
-        //     return;
         map[iter->altTokenId].iterators.push_back(iter);
+        _size += 1;
         return true;
     }
 
     size_t erase(const_iterator_t iter)
     {
-        auto tokenId { iter->altTokenId };
-        // if (tokenId == TokenId::WART) {
-        //     _size -= 1;
-        //     return 1;
-        // }
-        if (auto it { map.find(tokenId) }; it != map.end()) {
-            auto n { std::erase(it->second.iterators, iter) };
+        size_t n { 0 };
+        if (auto it { map.find(iter->altTokenId) }; it != map.end()) {
+            n = std::erase(it->second.iterators, iter);
+            _size -= n;
             if (n != 0) { // deleted
                 if (it->second.iterators.size() == 0)
                     map.erase(it);
-                _size -= 1;
-                return n;
             }
         }
-        return 0;
+        return n;
     }
 
     auto size() const { return _size; }

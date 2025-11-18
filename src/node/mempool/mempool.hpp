@@ -79,7 +79,7 @@ private:
         bool erasedWart;
         bool erasedToken;
     };
-    EraseResult erase_internal(Txset::const_iter_t, balance_iterator wartIter, wrt::optional<balance_iterator> tokenIter={});
+    EraseResult erase_internal_wartiter(Txset::const_iter_t, balance_iterator wartIter, wrt::optional<balance_iterator> tokenIter={});
     [[nodiscard]] balance_iterator create_or_get_balance_iter(AccountToken at, chainserver::DBCache& cache);
     void prune();
 
