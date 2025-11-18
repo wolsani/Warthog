@@ -103,46 +103,43 @@ wrt::optional<TransactionMessage> Mempool::operator[](const HashView txHash) con
 
 auto Mempool::erase_internal_wartiter(Txset::const_iter_t iter, balance_iterator wartIter, wrt::optional<balance_iterator> tokenIter) -> EraseResult
 {
+
+    EraseResult er { false, false };
+
+    // now unlock balances that were occupied by erased mempool entry
+    if (master) { // only master keeps track of locked balances
+        updates.push_back(Erase { iter->txid() });
+        auto unlock { [&](BalanceEntries::iterator& iter, Funds_uint64 amount) {
+            assert(iter != lockedBalances.end()); // because there is nonzero locked balance (t->amount != 0)
+            auto& balanceEntry { iter->second };
+            balanceEntry.unlock(amount);
+            if (balanceEntry.is_clean()) {
+                lockedBalances.erase(iter);
+                iter = lockedBalances.end();
+                return true;
+            }
+            return false;
+        } };
+        // update locked token balance
+        if (auto tokenSpend { iter->spend_token_assert() }) {
+            if (!tokenIter)
+                tokenIter = lockedBalances.find({ iter->from_id(), iter->altTokenId });
+            er.erasedToken = unlock(*tokenIter, tokenSpend->amount);
+        }
+
+        // update locked wart balance
+        Wart wartSpend { iter->spend_wart_assert() };
+        er.erasedWart = unlock(wartIter, wartSpend);
+    }
+
     assert(size() == index.size());
     assert(size() == byFee.size());
     assert(size() == byToken.size());
-
-    // copy before erase
-    const TransactionId id { iter->txid() };
-
     // erase iter and its references
     assert(index.erase(iter) == 1);
     assert(byFee.erase(iter) == 1);
     assert(byToken.erase(iter) == 1);
-
-    auto fromId { iter->from_id() };
     txs().erase(iter);
-
-    if (master)
-        updates.push_back(Erase { id });
-
-    auto unlock { [&](BalanceEntries::iterator& iter, Funds_uint64 amount) {
-        assert(iter != lockedBalances.end()); // because there is nonzero locked balance (t->amount != 0)
-        auto& balanceEntry { iter->second };
-        balanceEntry.unlock(amount);
-        if (balanceEntry.is_clean()) {
-            lockedBalances.erase(iter);
-            iter = lockedBalances.end();
-        }
-        return false;
-    } };
-    EraseResult er { false, false };
-
-    // update locked token balance
-    if (auto tokenSpend { iter->spend_token_assert() }) {
-        if (!tokenIter)
-            tokenIter = lockedBalances.find({ fromId, iter->altTokenId });
-        er.erasedToken = unlock(*tokenIter, tokenSpend->amount);
-    }
-
-    // update locked wart balance
-    Wart wartSpend { iter->spend_wart_assert() };
-    er.erasedWart = unlock(wartIter, wartSpend);
     return er;
 }
 

@@ -82,7 +82,7 @@ public:
     auto size() const { return _size; }
 
 private:
-    size_t _size;
+    size_t _size { 0 };
     std::map<TokenId, Entry> map;
 };
 namespace extractors {

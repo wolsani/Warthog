@@ -3,8 +3,13 @@
 wrt::optional<POWVersion> POWVersion::from_params(NonzeroHeight height, BlockVersion version, bool testnet)
 {
     if (testnet) {
-        if (version != 4)
-            return {};
+        if (height.value() <= 2) {
+            if (version != 3)
+                return {};
+        } else {
+            if (version != 4)
+                return {};
+        }
         if (height.value() <= 2) {
             return POWVersion { Janus7 {} };
         } else {
