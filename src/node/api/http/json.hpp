@@ -19,6 +19,7 @@ json to_json(const api::Peerinfo&);
 json to_json(const api::ParsedPrice&);
 json to_json(const TCPPeeraddr&);
 json to_json(const api::WartBalance&);
+json to_json(const api::JanushashNumber&);
 json to_json(const Grid&);
 json to_json(const Hash&);
 json to_json(const TxHash&);
@@ -45,6 +46,7 @@ json to_json(const api::Wallet&);
 json to_json(const api::HashrateInfo&);
 json to_json(const api::HashrateBlockChart&);
 json to_json(const api::HashrateTimeChart&);
+
 json to_json(const OffenseEntry& e);
 json to_json(const wrt::optional<SignedSnapshot>&);
 json to_json(const TransactionId&);

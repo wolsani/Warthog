@@ -112,21 +112,13 @@ void get_wallet_from_privkey(const PrivKey& pk, WalletCb cb)
     cb(api::Wallet { pk });
 }
 
-void get_janushash_number(std::string_view sv, RawCb cb)
+void get_janushash_number(std::string_view sv, ResultCb<api::JanushashNumber> cb)
 {
     // LATER: do header check in different thread
     Header h;
     if (!parse_hex(sv, h))
-        cb({ "" });
-
-    auto double_to_string = [](double d) {
-        std::string s;
-        s.resize(35);
-        auto n { std::snprintf(s.data(), s.size(), "%.20e", d) };
-        s.resize(n);
-        return s;
-    };
-    cb({ double_to_string(h.janus_number()) });
+        cb(Error(BADHEADER));
+    cb(api::JanushashNumber { h.janus_number() });
 }
 
 void parse_price(std::string_view priceStr, AssetPrecision p, ResultCb<api::ParsedPrice> cb)
@@ -135,7 +127,7 @@ void parse_price(std::string_view priceStr, AssetPrecision p, ResultCb<api::Pars
         auto floor { Price_uint64::from_double_adjusted(*d, p, false) };
         auto ceil { Price_uint64::from_double_adjusted(*d, p, true) };
         if (floor && ceil)
-            cb(api::ParsedPrice {p, *floor, *ceil });
+            cb(api::ParsedPrice { p, *floor, *ceil });
     }
     cb(Error(EBADPRICE));
 }

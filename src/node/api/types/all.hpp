@@ -61,6 +61,7 @@ struct AddressWithId {
     Address address;
     AccountId accountId;
 };
+
 struct WartBalance {
     wrt::optional<AddressWithId> address;
     Wart balance;
@@ -68,6 +69,10 @@ struct WartBalance {
         : balance(Wart::zero())
     {
     }
+};
+
+struct JanushashNumber {
+    double d;
 };
 
 struct TokenBalance {

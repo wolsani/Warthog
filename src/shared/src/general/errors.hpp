@@ -181,6 +181,7 @@
     XX(312, EBADCANCELNONCE, "cannot parse cancel nonce")                          \
     XX(313, EBADASSETUNITS, "cannot parse asset units")                            \
     XX(314, EBADASSETPRECISION, "cannot parse asset precision")                    \
+    XX(315, BADHEADER, "cannot parse header")                                      \
     XX(1000, ESIGTERM, "received SIGTERM")                                         \
     XX(1001, ESIGHUP, "received SIGHUP")                                           \
     XX(1002, ESIGINT, "received SIGINT")                                           \

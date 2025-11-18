@@ -61,7 +61,7 @@ void get_round16bit_funds(Wart w, RoundCb cb);
 void get_info(InfoCb cb);
 void get_wallet_new(WalletCb cb);
 void get_wallet_from_privkey(const PrivKey& pk, WalletCb cb);
-void get_janushash_number(std::string_view, RawCb cb);
+void get_janushash_number(std::string_view, ResultCb<api::JanushashNumber> cb);
 void parse_price(std::string_view, AssetPrecision precision, ResultCb<api::ParsedPrice> cb);
 void sample_verified_peers(size_t n, SampledPeersCb cb);
 

@@ -27,6 +27,7 @@ struct PeerinfoConnections;
 struct Raw;
 struct TokenBalance;
 struct WartBalance;
+struct JanushashNumber;
 namespace block {
 
 struct RewardData;

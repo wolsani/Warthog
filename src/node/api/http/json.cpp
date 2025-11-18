@@ -836,6 +836,12 @@ json to_json(const api::WartBalance& b)
     }
     return j;
 }
+json to_json(const api::JanushashNumber& jn)
+{
+    return {
+        { "janushashNumber", jn.d }
+    };
+}
 
 json to_json(const Grid& g)
 {

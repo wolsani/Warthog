@@ -37,7 +37,6 @@ using IpCounterCb = std::function<void(const api::IPCounter&)>;
 using ThrottledCb = std::function<void(const std::vector<api::ThrottledPeer>&)>;
 using SyncedCb = std::function<void(bool)>;
 using MempoolTxsCb = std::function<void(std::vector<wrt::optional<TransactionMessage>>&)>;
-using RawCb = std::function<void(const api::Raw&)>;
 using SampledPeersCb = std::function<void(const std::vector<TCPPeeraddr>&)>;
 using TransmissionCb = std::function<void(const api::TransmissionTimeseries&)>;
 using ErrorCb = std::function<void(const wrt::optional<Error>&)>;
