@@ -390,7 +390,7 @@ void ChainDB::delete_state64_from(StateId64 fromId)
 {
     assert(fromId.value() > 0);
     auto& next_ref { cache.ids.next64 };
-    if (next_ref <= fromId) {
+    if (next_ref < fromId) {
         spdlog::error("BUG: Deleting nothing, fromId = {} >= {} = cache.stateId64", fromId.value(), next_ref.value());
     } else {
         next_ref = fromId;
