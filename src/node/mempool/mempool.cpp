@@ -67,24 +67,24 @@ auto MempoolTransactions::insert(Entry e) -> std::pair<iter_t, bool>
     return p;
 }
 
-void MempoolTransactions::apply_log(const Updates& log)
+void MempoolTransactions::replay_updates(const Updates& log)
 {
     for (auto& l : log) {
         std::visit([&](auto& entry) {
-            apply_logevent(entry);
+            apply_update(entry);
         },
             l);
     }
 }
 
-void MempoolTransactions::apply_logevent(const Put& a)
+void MempoolTransactions::apply_update(const Put& a)
 {
     erase(a.entry.txid());
     api::event::emit_mempool_add(a, txs.size());
     insert(std::move(a.entry));
 }
 
-void MempoolTransactions::apply_logevent(const Erase& e)
+void MempoolTransactions::apply_update(const Erase& e)
 {
     erase(e.id);
     api::event::emit_mempool_erase(e, size());

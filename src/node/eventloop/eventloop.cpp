@@ -348,7 +348,7 @@ void Eventloop::handle_event(OnProcessConnection&& m)
 void Eventloop::handle_event(StateUpdate&& e)
 {
     // mempool
-    mempool.apply_log(std::move(e.mempoolUpdates));
+    mempool.replay_updates(std::move(e.mempoolUpdates));
 
     // header chain
     std::visit([&](auto&& action) {
@@ -576,7 +576,7 @@ void Eventloop::handle_event(FailedConnect&& e)
 
 void Eventloop::handle_event(mempool::Updates&& log)
 {
-    mempool.apply_log(log);
+    mempool.replay_updates(log);
 
     // build vector of mempool entries
     std::vector<mempool::Entry> entries;

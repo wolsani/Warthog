@@ -92,8 +92,8 @@ private:
         tuple_t tuple;
     };
 
-    void apply_logevent(const Put&);
-    void apply_logevent(const Erase&);
+    void apply_update(const Put&);
+    void apply_update(const Erase&);
     bool erase(TransactionId txid);
 
 private:
@@ -125,7 +125,7 @@ public:
     [[nodiscard]] auto by_fee_inc_le(AccountId aid, wrt::optional<CompactUInt> threshold = {}) { return txs.by_fee_inc_le(aid, threshold); }
     auto max_size() const { return maxSize; }
     auto size() const { return txs.size(); }
-    void apply_log(const Updates& log);
+    void replay_updates(const Updates& log);
 
     // operator[]
     [[nodiscard]] auto operator[](const TransactionId& id) const
