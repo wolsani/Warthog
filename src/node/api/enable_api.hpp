@@ -84,7 +84,7 @@ struct enable_api_methods<Host, TypeCollection<Requests...>> {
         visit([&]<typename E>(E&& e) {
             Host* phost { static_cast<Host*>(this) };
             if constexpr (IsAPIObject<std::remove_cvref_t<E>>) {
-                std::optional<logging::TimingObject> t;
+                tl::optional<logging::TimingObject> t;
                 if (timing) {
                     t.emplace(timing->time(E::Request::name));
                 }

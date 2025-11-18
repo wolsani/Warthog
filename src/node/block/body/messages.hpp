@@ -131,7 +131,7 @@ class LiquidityDepositMessage : public ComposeTransactionMessage<5, LiquidityDep
 
 public:
     [[nodiscard]] Wart spend_wart_throw() const { return sum_throw(fee(), quote()); }
-    [[nodiscard]] std::optional<messages::SpendToken> spend_token_throw() const
+    [[nodiscard]] tl::optional<messages::SpendToken> spend_token_throw() const
     {
         if (base().is_zero())
             return {};
