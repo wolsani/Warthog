@@ -252,7 +252,7 @@ public:
         t.indexGenerator.section("Account Endpoints");
         hook_get_2(t, "/account/:account/balance/:token", api_call<chainserver::GetTokenBalance>);
         hook_get_2(t, "/account/:account/history/:beforeTxIndex", api_call<chainserver::GetAccountHistory>);
-        hook_get_1(t, "/account/richlist/:token", get_account_richlist);
+        hook_get_1(t, "/account/richlist/:token", get_token_richlist);
 
         t.indexGenerator.section("Peers Endpoints");
         hook_get(t, "/peers/ip_count", get_ip_count);

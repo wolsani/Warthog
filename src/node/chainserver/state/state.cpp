@@ -1230,19 +1230,38 @@ api::WartBalance State::api_get_wart_balance(api::AccountIdOrAddress a) const
     return res;
 }
 
-wrt::optional<TokenId> State::normalize(api::TokenIdOrSpec token) const
+auto State::normalize(api::TokenIdOrSpec token) const -> wrt::optional<api::NormalizedToken>
 {
-    return token.map_alternative([&](const api::TokenSpec& h) -> wrt::optional<TokenId> {
-        auto o { db.lookup_asset(h.assetHash) };
-        if (o) {
-            auto tid { o->id.token_id(h.poolLiquidity) };
-            if (static_cast<AssetId>(db.next_id()).token_id() > tid) {
-                // tokenId does exist in database
-                return tid;
+    return token.visit_overload(
+        [&](TokenId id) -> wrt::optional<api::NormalizedToken> {
+            if (auto nwId { id.non_wart() }) {
+                auto asset { db.lookup_asset(nwId->asset_id()) };
+                if (asset)
+                    return api::NormalizedToken {
+                        .id { id },
+                        .spec { asset->hash, nwId->is_liquidity() },
+                        .name { asset->name.to_string() }
+                    };
+                return {}; // asset corresponding to token id does not exist
+            } else {
+                return api::NormalizedToken::WART();
             }
-        }
-        return {};
-    });
+        },
+        [&](const api::TokenSpec& h) -> wrt::optional<NormalizedToken> {
+            auto asset { db.lookup_asset(h.assetHash) };
+            if (asset) {
+                auto tid { asset->id.token_id(h.isLiquidity) };
+                assert(tid.is_liquidity() == h.isLiquidity);
+                return api::NormalizedToken {
+                    .id { tid },
+                    .spec { asset->hash, h.isLiquidity },
+                    .name { asset->name.to_string() }
+                };
+            } else if (h.assetHash.is_wart()) {
+                return api::NormalizedToken::WART();
+            }
+            return {};
+        });
 }
 
 size_t State::on_mempool_constraint_update()
@@ -1254,13 +1273,13 @@ wrt::optional<AccountId> State::normalize(api::AccountIdOrAddress a) const
     return a.map_alternative([&](const Address& a) { return db.lookup_account(a); });
 }
 
-api::TokenBalance State::api_get_token_balance_recursive(api::AccountIdOrAddress account, api::TokenIdOrSpec token) const
+api::TokenBalance State::api_get_token_balance_recursive(api::AccountIdOrAddress account, api::TokenIdOrSpec spec) const
 {
     auto accountId { normalize(account) };
-    auto tokenId { normalize(token) };
-    if (!accountId || !tokenId)
+    auto token { normalize(spec) };
+    if (!accountId || !token)
         return api::TokenBalance::notfound();
-    return api_get_token_balance_recursive(*accountId, *tokenId);
+    return api_get_token_balance_recursive(*accountId, token->id);
 }
 
 api::TokenBalance State::api_get_token_balance_recursive(AccountId aid, TokenId tid) const
@@ -1375,10 +1394,10 @@ auto State::api_get_history(const api::AccountIdOrAddress& a, int64_t beforeId) 
     };
 }
 
-auto State::api_get_richlist(api::TokenIdOrSpec token, size_t limit) const -> Result<api::Richlist>
+auto State::api_get_richlist(api::TokenIdOrSpec spec, size_t limit) const -> Result<api::RichlistInfo>
 {
-    if (auto tokenId { normalize(token) }; tokenId)
-        return db.lookup_richlist(*tokenId, limit);
+    if (auto token { normalize(spec) })
+        return api::RichlistInfo{db.lookup_richlist(token->id, limit),std::move(*token)};
     return Error(ETOKIDNOTFOUND);
 }
 

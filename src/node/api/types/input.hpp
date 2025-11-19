@@ -13,12 +13,13 @@ struct AssetIdOrHash : public wrt::alternative<AssetId, AssetHash> {
 };
 struct TokenSpec {
     AssetHash assetHash;
-    bool poolLiquidity;
-    TokenSpec(AssetHash ah, bool liquidity)
+    bool isLiquidity;
+    constexpr TokenSpec(AssetHash ah, bool liquidity)
         : assetHash(std::move(ah))
-        , poolLiquidity(liquidity)
+        , isLiquidity(liquidity)
     {
     }
+    static const TokenSpec WART;
 
     static TokenSpec parse_throw(std::string_view s)
     {
@@ -29,7 +30,7 @@ struct TokenSpec {
 
     std::string to_string() const
     {
-        return (poolLiquidity ? "liquidity" : "asset") + std::string(":") + assetHash.hex_string();
+        return (isLiquidity ? "liquidity" : "asset") + std::string(":") + assetHash.hex_string();
     }
 
     static wrt::optional<TokenSpec> parse(std::string_view s)
@@ -53,6 +54,9 @@ struct TokenSpec {
         return TokenSpec { *ah, liquidity };
     }
 };
+
+constexpr TokenSpec TokenSpec::WART = { AssetHash::WART, false };
+
 struct TokenIdOrSpec : public wrt::alternative<TokenId, TokenSpec> {
     using alternative::alternative;
 };

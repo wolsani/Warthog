@@ -12,7 +12,7 @@ struct TokenId : public UInt64WithOperators<TokenId> {
     [[nodiscard]] bool is_wart() const { return value() == 0; }
     [[nodiscard]] bool is_liquidity() const
     {
-        return (value() & 1) != 0; // shares have odd ids
+        return (value() & 1) == 0; // liquidity has even ids
     }
     [[nodiscard]] wrt::optional<NonWartTokenId> non_wart() const;
 };

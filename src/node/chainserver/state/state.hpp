@@ -110,7 +110,7 @@ public:
     api::TokenBalance api_get_token_balance_recursive(AccountId, TokenId) const;
     auto api_get_head() const -> api::ChainHead;
     auto api_get_history(const api::AccountIdOrAddress& a, int64_t beforeId = 0x7fffffffffffffff) const -> wrt::optional<api::AccountHistory>;
-    auto api_get_richlist(api::TokenIdOrSpec token, size_t limit) const -> Result<api::Richlist>;
+    auto api_get_richlist(api::TokenIdOrSpec token, size_t limit) const -> Result<api::RichlistInfo>;
     auto api_get_mempool(size_t) const -> api::MempoolEntries;
     auto api_get_tx(const TxHash& hash) const -> wrt::optional<api::Transaction>;
     auto api_get_transaction_minfee() -> api::TransactionMinfee;
@@ -127,7 +127,9 @@ public:
     size_t api_db_size() const;
 
 private:
-    [[nodiscard]] wrt::optional<TokenId> normalize(api::TokenIdOrSpec) const;
+    using NormalizedToken = api::NormalizedToken;
+
+    [[nodiscard]] wrt::optional<NormalizedToken> normalize(api::TokenIdOrSpec) const;
     [[nodiscard]] wrt::optional<AccountId> normalize(api::AccountIdOrAddress) const;
     // wrt::optional<AssetDetail> db_lookup_token(const api::AssetIdOrHash&) const;
     // delegated getters

@@ -318,8 +318,20 @@ struct TransactionsByBlocks {
 struct TransactionMinfee {
     CompactUInt minfee;
 };
+
+struct NormalizedToken {
+    TokenId id;
+    api::TokenSpec spec;
+    std::string name;
+    static const NormalizedToken WART() { return { .id { TokenId::WART }, .spec { api::TokenSpec::WART }, .name { "WART" } }; }
+};
 struct Richlist {
     std::vector<std::pair<Address, Wart>> entries;
+};
+
+struct RichlistInfo {
+    Richlist richlist;
+    NormalizedToken token;
 };
 struct MempoolEntry : public TransactionMessage {
     TxHash txHash;

@@ -84,10 +84,12 @@ using Transaction = wrt::variant<
     OrderCancelationTransaction>;
 
 struct Richlist;
+struct RichlistInfo;
 struct Rollback;
 struct Round16Bit;
 struct TransactionsByBlocks;
 struct TransactionMinfee;
+struct NormalizedToken;
 struct Wallet;
 struct DBSize;
 struct NodeInfo;

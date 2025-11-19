@@ -35,7 +35,7 @@
         api::AccountIdOrAddress, address, uint64_t, beforeId)             \
     XX(GetMempool, api::MempoolEntries)                                   \
     XX(GetBlockHash, Hash, Height, height)                                \
-    XX(GetRichlist, api::Richlist, api::TokenIdOrSpec, token)
+    XX(GetRichlist, api::RichlistInfo, api::TokenIdOrSpec, token)
 
 namespace chainserver {
 DEFINE_TYPE_COLLECTION(APITypes, LIST_API_TYPES);

@@ -1,8 +1,8 @@
 #pragma once
 #include "general/view.hpp"
+#include "wrt/optional.hpp"
 #include <array>
 #include <cstring>
-#include "wrt/optional.hpp"
 #include <string>
 
 class Hash;
@@ -23,11 +23,15 @@ class Hash : public std::array<uint8_t, 32> {
 public:
     static constexpr size_t byte_size() { return 32; }
     static wrt::optional<Hash> parse_string(std::string_view);
+    static constexpr Hash zero()
+    {
+        return std::array<uint8_t, 32> { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    }
     static Hash uninitialized()
     {
         return {};
     }
-    Hash(std::array<uint8_t, 32> other)
+    constexpr Hash(std::array<uint8_t, 32> other)
         : array(std::move(other))
     {
     }
@@ -60,7 +64,7 @@ inline bool operator==(const HashView& hv, const Hash& h)
 template <typename T>
 class GenericHash : public Hash {
 public:
-    explicit GenericHash(Hash h)
+    constexpr explicit GenericHash(Hash h)
         : Hash(std::move(h))
     {
     }
@@ -68,7 +72,7 @@ public:
         : Hash(h)
     {
     }
-    explicit GenericHash(std::array<uint8_t, 32> other)
+    constexpr explicit GenericHash(std::array<uint8_t, 32> other)
         : Hash(std::move(other))
     {
     }
@@ -83,6 +87,10 @@ public:
     {
         return T { Hash::uninitialized() };
     }
+    constexpr static T zero()
+    {
+        return T { Hash::zero() };
+    }
 };
 
 class BlockHash : public GenericHash<BlockHash> {
@@ -94,7 +102,13 @@ public:
 class AssetHash : public GenericHash<AssetHash> {
 public:
     using GenericHash::GenericHash;
+    static const AssetHash WART;
+    constexpr bool is_wart() const
+    {
+        return *this == AssetHash::WART;
+    }
 };
+constexpr const AssetHash AssetHash::WART = { zero() };
 
 class TxHash : public GenericHash<TxHash> {
 public:

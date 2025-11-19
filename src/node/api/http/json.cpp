@@ -709,6 +709,22 @@ json to_json(const api::Richlist& l)
     }
     return a;
 }
+json to_json(const api::RichlistInfo& r)
+{
+    return {
+        { "token", to_json(r.token) },
+        { "richlist", to_json(r.richlist) }
+    };
+}
+
+json to_json(const api::NormalizedToken& t)
+{
+    return {
+        { "id", t.id },
+        { "spec", t.spec.to_string() },
+        { "name", t.name }
+    };
+}
 
 nlohmann::json to_json(const api::Wallet& w)
 {

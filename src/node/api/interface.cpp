@@ -304,7 +304,7 @@ void get_account_token_balance(const api::AccountIdOrAddress& address, const api
     global().chainServer->api_call(chainserver::GetTokenBalance { address, t }, cb);
 }
 
-void get_account_richlist(const api::TokenIdOrSpec& token, RichlistCb f)
+void get_token_richlist(const api::TokenIdOrSpec& token, RichlistCb f)
 {
     global().chainServer->api_call(chainserver::GetRichlist { token }, std::move(f));
 }

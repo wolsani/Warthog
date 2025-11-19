@@ -81,7 +81,7 @@ void get_headerdownload(HeaderdownloadCb f);
 
 // account functions
 void get_account_token_balance(const api::AccountIdOrAddress& address, const api::TokenIdOrSpec&, TokenBalanceCb cb);
-void get_account_richlist(const api::TokenIdOrSpec&, RichlistCb cb);
+void get_token_richlist(const api::TokenIdOrSpec&, RichlistCb cb);
 
 void get_transmission_minutes(TransmissionCb cb);
 void get_transmission_hours(TransmissionCb cb);
