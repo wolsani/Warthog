@@ -179,7 +179,7 @@ JSONConverter::operator CancelHeightEl() const { return cancel_height(); }
 AssetName JSONConverter::asset_name() const
 {
     try {
-        return AssetName(json.at("assetName").get<std::string>());
+        return AssetName(json.at("name").get<std::string>());
     } catch (...) {
     }
     throw Error(EASSETNAME);

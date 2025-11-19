@@ -400,7 +400,7 @@ class BalanceChecker {
         // unlocks value `v` using locked (no change of total balance)
         void unlock_balance(TokenId id, Funds_uint64 v)
         {
-            flow[id].locked.add(v);
+            flow[id].locked.subtract(v);
         }
 
         // subtracts funds from locked balance
@@ -646,12 +646,14 @@ public:
     void register_asset_creation(const AssetCreation& tc, NonzeroHeight)
     {
         auto s { process_signer(tc) };
+        auto name{tc.asset_name().to_string()};
+        spdlog::info("Asset name: {}", name);
         assetCreations.push_back(block_apply::AssetCreation::Internal {
             s,
             // index,
             {
-                tc.asset_name(),
                 tc.supply(),
+                tc.asset_name(),
             } });
     }
 

@@ -210,6 +210,7 @@ struct NonzeroBaseQuote : public defi::BaseQuote {
     {
         validate_throw();
     }
+
 private:
     void validate_throw()
     {
@@ -238,6 +239,6 @@ using Order = signed_entry<AssetIdEl, BuyEl, NonzeroAmountEl, LimitPriceEl>;
 using LiquidityDeposit = signed_entry<AssetIdEl, NonzeroBaseQuoteEl>;
 using LiquidityWithdrawal = signed_entry<AssetIdEl, NonzeroAmountEl>;
 using TokenTransfer = signed_entry<AssetIdEl, ToValidAccEl, NonzeroAmountEl>;
-using AssetCreation = signed_entry<AssetNameEl, AssetSupplyEl>;
+using AssetCreation = signed_entry<AssetSupplyEl, AssetNameEl>;
 
 }

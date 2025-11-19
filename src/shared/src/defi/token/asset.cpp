@@ -1,10 +1,10 @@
 #include "asset.hpp"
 #include "general/reader.hpp"
 #include "general/view.hpp"
-AssetName::AssetName(View<5> data)
+AssetName::AssetName(View<maxlen> data)
     : AssetName([&data]() {
         size_t end { data.size() };
-        for (size_t i = 0; i < data.size(); ++i) {
+        for (size_t i = 0; i < maxlen; ++i) {
             auto c { data[i] };
             if (end < data.size() && c != 0) // when we found the zero byte, only zero-bytes can follow
                 throw Error(EASSETNAME);

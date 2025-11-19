@@ -42,12 +42,7 @@ public:
 
     std::string to_string() const
     {
-        size_t i { 0 };
-        for (; i < sizeof(name); ++i) {
-            if (name[i] == '\0')
-                break;
-        }
-        return { name, i };
+        return name;
     }
     void serialize(Serializer auto&& s) const
     {
