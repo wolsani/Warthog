@@ -626,7 +626,7 @@ public:
                 auto valid_to_id { __register_transfer(aid.token_id(), at.to_id(), at.amount(), s) };
                 ts.assetTransfers.push_back({ s, { aid, valid_to_id, at.amount() } });
             },
-            [&](const block::body::ShareTransfer& st) {
+            [&](const block::body::LiquidityTransfer& st) {
                 auto s(process_signer(st));
                 auto valid_to_id { __register_transfer(aid.token_id(true), st.to_id(), st.shares(), s) };
                 ts.sharesTransfers.push_back({ s, { aid, valid_to_id, st.shares() } });

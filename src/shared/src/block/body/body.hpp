@@ -177,7 +177,7 @@ struct AssetTransfers : public Tag<"assetTransfers", Vector<body::AssetTransfer>
     auto& asset_transfers() const { return get(); }
     auto& asset_transfers() { return get(); }
 };
-struct ShareTransfers : public Tag<"shareTransfers", Vector<body::ShareTransfer>> {
+struct ShareTransfers : public Tag<"shareTransfers", Vector<body::LiquidityTransfer>> {
     using Tag::Tag;
     auto& share_transfers() const { return get(); }
     auto& share_transfers() { return get(); }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api/http/json_converter.hpp"
+#include "block/body/labels.hpp"
 #include "block/body/messages.hpp"
 #include "block/body/nonce.hpp"
 #include "block/chain/height.hpp"
@@ -52,19 +53,19 @@ public:
 #define DEFINE_CREATE_MESSAGE(name, str_tag, ...)                  \
     class name : public TransactionCreateBase<name, __VA_ARGS__> { \
     public:                                                        \
-        static const char* tag() { return str_tag; };              \
+        static constexpr const char* tag() { return str_tag; };    \
         using TransactionCreateBase::TransactionCreateBase;        \
         operator std::string();                                    \
         static name parse_from(const JSONConverter& json);         \
     };
 
-DEFINE_CREATE_MESSAGE(WartTransferCreate, "wartTransfer", ToAddrEl, NonzeroWartEl)
-DEFINE_CREATE_MESSAGE(TokenTransferCreate, "tokenTransfer", AssetHashEl, LiquidityFlagEl, ToAddrEl, AmountEl)
-DEFINE_CREATE_MESSAGE(LimitSwapCreate, "limitSwap", AssetHashEl, BuyEl, AmountEl, LimitPriceEl)
-DEFINE_CREATE_MESSAGE(LiquidityDepositCreate, "liquidityDeposit", AssetHashEl, AmountEl, WartEl)
-DEFINE_CREATE_MESSAGE(LiquidityWithdrawalCreate, "liquidityWithdrawal", AssetHashEl, SharesEl)
-DEFINE_CREATE_MESSAGE(CancelationCreate, "cancelation", CancelHeightEl, CancelNonceEl)
-DEFINE_CREATE_MESSAGE(AssetCreationCreate, "assetCreation", AssetSupplyEl, AssetNameEl)
+DEFINE_CREATE_MESSAGE(WartTransferCreate, ::block::labels::wartTransfer, ToAddrEl, NonzeroWartEl)
+DEFINE_CREATE_MESSAGE(TokenTransferCreate, ::block::labels::tokenTransfer, AssetHashEl, LiquidityFlagEl, ToAddrEl, AmountEl)
+DEFINE_CREATE_MESSAGE(LimitSwapCreate, ::block::labels::limitSwap, AssetHashEl, BuyEl, AmountEl, LimitPriceEl)
+DEFINE_CREATE_MESSAGE(LiquidityDepositCreate, ::block::labels::liquidityDeposit, AssetHashEl, AmountEl, WartEl)
+DEFINE_CREATE_MESSAGE(LiquidityWithdrawalCreate, ::block::labels::liquidityWithdrawal, AssetHashEl, SharesEl)
+DEFINE_CREATE_MESSAGE(CancelationCreate, ::block::labels::cancelation, CancelHeightEl, CancelNonceEl)
+DEFINE_CREATE_MESSAGE(AssetCreationCreate, ::block::labels::assetCreation, AssetSupplyEl, AssetNameEl)
 
 #undef DEFINE_CREATE_MESSAGE
 

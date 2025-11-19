@@ -920,7 +920,7 @@ private:
                                 auto toAddress { c.addresses.fetch(t.to_id()) };
                                 toMempool.push_back(TokenTransferMessage(t.txid(pinHeight), t.pin_nonce().reserved, t.compact_fee(), asset.hash, false, toAddress, t.amount(), t.signature()));
                         },
-                        [&](PinHeight pinHeight, const ShareTransfer& t) {
+                        [&](PinHeight pinHeight, const LiquidityTransfer& t) {
                                 auto toAddress { c.addresses.fetch(t.to_id()) };
                                 toMempool.push_back(TokenTransferMessage(t.txid(pinHeight), t.pin_nonce().reserved, t.compact_fee(), asset.hash, true, toAddress, t.shares(), t.signature()));
                         },

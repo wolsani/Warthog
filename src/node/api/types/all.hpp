@@ -3,6 +3,7 @@
 #include "accountid_or_address.hpp"
 #include "api/types/input.hpp"
 #include "asset_lookup_trace.hpp"
+#include "block/body/labels.hpp"
 #include "block/body/primitives.hpp"
 #include "block/chain/history/index.hpp"
 #include "block/chain/signed_snapshot.hpp"
@@ -162,19 +163,19 @@ struct WithSignedInfo : public SignedInfoData, T {
 };
 
 struct RewardData {
-    static constexpr const char label[] = "Reward";
+    static constexpr const char *label = ::block::labels::reward;
     Address toAddress;
     Wart wart;
 };
 
 struct WartTransferData {
-    static constexpr const char label[] = "WartTransfer";
+    static constexpr const char* label = ::block::labels::wartTransfer;
     Address toAddress;
     Wart amount;
 };
 
 struct TokenTransferData {
-    static constexpr const char label[] = "TokenTransfer";
+    static constexpr const char* label = ::block::labels::tokenTransfer;
     AssetBasic assetInfo;
     bool isLiquidity;
     Address toAddress;
@@ -183,7 +184,7 @@ struct TokenTransferData {
 };
 
 struct NewOrderData {
-    static constexpr const char label[] = "Order";
+    static constexpr const char* label = ::block::labels::limitSwap;
     AssetBasic assetInfo;
     Funds_uint64 amount;
     Price_uint64 limit;
@@ -193,7 +194,7 @@ struct NewOrderData {
 };
 
 struct MatchData {
-    static constexpr const char label[] = "Match";
+    static constexpr const char *label = ::block::labels::match;
     using Swap = CombineElements<BaseEl, QuoteEl, ReferredHistoryIdEl>;
     AssetBasic assetInfo;
     defi::BaseQuote poolBefore;
@@ -203,19 +204,19 @@ struct MatchData {
 };
 
 struct AssetCreationData {
-    static constexpr const char label[] = "Creation";
+    static constexpr const char *label = ::block::labels::assetCreation;
     AssetName name;
     FundsDecimal supply;
     wrt::optional<AssetId> assetId;
 };
 
 struct CancelationData {
-    static constexpr const char label[] = "Cancelation";
+    static constexpr const char *label = ::block::labels::cancelation;
     TransactionId cancelTxid;
 };
 
 struct OrderCancelationData {
-    static constexpr const char label[] = "OrderCancelation";
+    static constexpr const char *label = ::block::labels::orderCancelation;
     TransactionId cancelTxid;
     bool buy;
     AssetBasic assetInfo;
@@ -224,7 +225,7 @@ struct OrderCancelationData {
 };
 
 struct LiquidityDepositData {
-    static constexpr const char label[] = "LiquidityDeposit";
+    static constexpr const char *label = ::block::labels::liquidityDeposit;
     AssetBasic assetInfo;
     Funds_uint64 baseDeposited;
     Wart quoteDeposited;
@@ -232,7 +233,7 @@ struct LiquidityDepositData {
 };
 
 struct LiquidityWithdrawalData {
-    static constexpr const char label[] = "LiquidityWithdrawal";
+    static constexpr const char *label = ::block::labels::liquidityWithdrawal;
     AssetBasic assetInfo;
     Funds_uint64 sharesRedeemed;
     wrt::optional<Funds_uint64> baseReceived;
